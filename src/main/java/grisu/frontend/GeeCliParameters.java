@@ -6,7 +6,7 @@ import com.beust.jcommander.Parameter;
 
 public class GeeCliParameters extends GrisuCliParameters {
 
-	@Parameter(names = { "-f", "--folder" }, description = "folder containing the test")
+	@Parameter(names = { "-f", "--applications-folder" }, description = "folder containing the test")
 	private String folder;
 	
 	@Parameter(names = {"--reset" }, description = "move all failed job log fails into the archive folder")

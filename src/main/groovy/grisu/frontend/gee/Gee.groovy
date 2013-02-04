@@ -50,7 +50,7 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 	}
 
 	private static void createTestStub(File path, String app, String name) {
-
+		
 		File folder = new File(path.getAbsolutePath()+File.separator+app+File.separator+TESTS_DIR_NAME+File.separator+name)
 
 		if (folder.exists()) {
@@ -100,6 +100,19 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 
 		temp = PackageFileHelper.getFile('readme_files.txt')
 		new File(folder, 'readme.txt') << temp.text
+		
+		File global_checks = new File(path, CHECKS_DIR_NAME)
+		temp = PackageFileHelper.getFile('is_true.py')
+		File isTrue = new File(global_checks, 'is_true.py')
+		isTrue << temp.text
+		
+		isTrue.setExecutable(true)
+		
+		temp = PackageFileHelper.getFile('is_not_true.py')
+		File isNotTrue = new File(global_checks, 'is_not_true.py')
+		isNotTrue << temp.text
+		
+		isNotTrue.setExecutable(true)
 
 	}
 
@@ -201,7 +214,7 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 			}
 		} else {
 
-			println "All good! No check failed. That can't be right..."
+			println "All good! No check failed. Hm, that can't be right..."
 
 		}
 
