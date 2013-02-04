@@ -50,7 +50,7 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 	}
 
 	private static void createTestStub(File path, String app, String name) {
-		
+
 		File folder = new File(path.getAbsolutePath()+File.separator+app+File.separator+TESTS_DIR_NAME+File.separator+name)
 
 		if (folder.exists()) {
@@ -100,9 +100,9 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 
 		temp = PackageFileHelper.getFile('readme_files.txt')
 		new File(folder, 'readme.txt') << temp.text
-		
-		
-		
+
+
+
 		File global_checks = new File(path, CHECKS_DIR_NAME)
 		if ( ! global_checks.exists() ) {
 			global_checks.mkdirs()
@@ -111,23 +111,23 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 				System.exit(1)
 			}
 		}
-		
+
 		temp = PackageFileHelper.getFile('is_true.py')
-		
-		if ( ! temp.exists() ) {
-		
-			File isTrue = new File(global_checks, 'is_true.py')
+
+
+		File isTrue = new File(global_checks, 'is_true.py')
+		if ( ! isTrue.exists() ) {
 			isTrue << temp.text
-		
+
 			isTrue.setExecutable(true)
 		}
-		
+
 		temp = PackageFileHelper.getFile('is_not_true.py')
-		
-		if ( ! temp.exists() ) {
-			File isNotTrue = new File(global_checks, 'is_not_true.py')
+
+		File isNotTrue = new File(global_checks, 'is_not_true.py')
+		if ( ! isNotTrue.exists() ) {
 			isNotTrue << temp.text
-		
+
 			isNotTrue.setExecutable(true)
 		}
 
