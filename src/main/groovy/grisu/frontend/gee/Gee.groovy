@@ -101,18 +101,35 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 		temp = PackageFileHelper.getFile('readme_files.txt')
 		new File(folder, 'readme.txt') << temp.text
 		
-		File global_checks = new File(path, CHECKS_DIR_NAME)
-		temp = PackageFileHelper.getFile('is_true.py')
-		File isTrue = new File(global_checks, 'is_true.py')
-		isTrue << temp.text
 		
-		isTrue.setExecutable(true)
+		
+		File global_checks = new File(path, CHECKS_DIR_NAME)
+		if ( ! global_checks.exists() ) {
+			global_checks.mkdirs()
+			if ( ! global_checks.exists() ) {
+				println "Can't create folder: "+global_checks.getAbsolutePath()
+				System.exit(1)
+			}
+		}
+		
+		temp = PackageFileHelper.getFile('is_true.py')
+		
+		if ( ! temp.exists() ) {
+		
+			File isTrue = new File(global_checks, 'is_true.py')
+			isTrue << temp.text
+		
+			isTrue.setExecutable(true)
+		}
 		
 		temp = PackageFileHelper.getFile('is_not_true.py')
-		File isNotTrue = new File(global_checks, 'is_not_true.py')
-		isNotTrue << temp.text
 		
-		isNotTrue.setExecutable(true)
+		if ( ! temp.exists() ) {
+			File isNotTrue = new File(global_checks, 'is_not_true.py')
+			isNotTrue << temp.text
+		
+			isNotTrue.setExecutable(true)
+		}
 
 	}
 
@@ -125,7 +142,7 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 		String root_folder_path = getCliParameters().getFolder()
 
 		if ( ! root_folder_path ) {
-			println "No folder specified. Use the --folder option."
+			println "No application folder specified. Use the -f/--application-folder option."
 			System.exit(1)
 		}
 
