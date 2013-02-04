@@ -5,7 +5,7 @@
 	<artifactId>gee</artifactId>
 	<packaging>jar</packaging>
 	<version>0.1-SNAPSHOT</version>
-	<name>a grisu client</name>
+	<name>A client to run end-to-end application tests via the grid.</name>
 
 	<parent>
 		<groupId>nz.org.nesi</groupId>
@@ -444,7 +444,11 @@
 
 
 	<properties>
-		<grisu.version>0.5.16-SNAPSHOT</grisu.version>
+		<grisu.version>0.5.16</grisu.version>
 	</properties>
+	<organization>
+		<name>NeSI</name>
+		<url>http://nesi.org.nz</url>
+	</organization>
 </project>
 
