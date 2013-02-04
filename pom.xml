@@ -450,5 +450,18 @@
 		<name>NeSI</name>
 		<url>http://nesi.org.nz</url>
 	</organization>
+	<scm>
+		<url>https://github.com/grisu/gee</url>
+		<connection>scm:git:git://github.com/grisu/gee.git</connection>
+		<developerConnection>scm:git:git@github.com:grisu/gee.git</developerConnection>
+	</scm>
+	<issueManagement>
+		<system>Github</system>
+		<url>https://github.com/grisu/gricli/issues</url>
+	</issueManagement>
+	<ciManagement>
+		<system>Jenkins</system>
+		<url>http://code.ceres.auckland.ac.nz/hudson/job/Gee-SNAPSHOT</url>
+	</ciManagement>
 </project>
 
