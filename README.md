@@ -35,24 +35,29 @@ You have to create a folder hierarchy of applications/tests for _gee_:
 	 |
 	 | ------ < application name >
 	 |                   |
-	 |                   | ------   Tests
-	 |                                    |
-	 |                                    | ---- < testname >
-	 |                                    |                 | ----- job.config
-	 |                                    |                 | ----- checks.config
-	 |                                    |                 |----- checks	 
-	 |                                    |                               |---- <check_script>	 
-	 |                                    |                               |---- <check_script>	 	 
-	 |                                    |	 
- 	 |                                    | ---- < testname >
-	 |                                    |                 | ----- job.config
-	 |                                    |                 | ----- checks.config
+	 |                   | ------   tests
+	 |                                |
+	 |                                | ---- < testname >
+	 |                                |              | ----- job.config
+	 |                                |              | ----- checks.config
+ 	 |                                |              |----- files	 
+	 |                                |                         |---- <input_file>
+	 |                                |                         |---- <input_file>
+	 |                                |                         | ...
+	 |                                |              |----- checks	 
+	 |                                |                         |---- <check_script>	 
+	 |                                |                         |---- <check_script>	 	 
+	 |                                |                         | ...
+	 |                                |	 
+ 	 |                                | ---- < testname >
+	 |                                |             | ----- job.config
+	 |                                |             | ----- checks.config
     ...
 	...
 	
 #### _job.config_
 
-The _job.config_ file sets up the job that will be submitted.
+The _job.config_ file sets up the job that will be submitted. 
 
 #### _checks.config_
 
