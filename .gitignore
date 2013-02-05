@@ -13,3 +13,4 @@ grisu-server.config
 .idea/**
 **orig
 **iml
+**logs**

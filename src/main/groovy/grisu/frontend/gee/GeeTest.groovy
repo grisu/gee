@@ -128,9 +128,15 @@ class GeeTest {
 		
 		addLogMessage("Assembling job...")
 
-		def config = new ConfigSlurper().parse(job_properties_file.toURI().toURL()).flatten()
+//		def config = new ConfigSlurper().parse(job_properties_file.toURI().toURL()).flatten()
+		Properties props = new Properties();
+		FileInputStream fis = new FileInputStream(job_properties_file);
+	 
+		//loading properites from properties file
+		props.load(fis);
 
-		JobDescription jd = new JobDescription(config)
+
+		JobDescription jd = new JobDescription(props.asImmutable())
 
 		job = JobObject.createJobObject(si, jd)
 		job.setJobname(this.jobname)
@@ -142,25 +148,38 @@ class GeeTest {
 	}
 
 	public void submitJob() {
-		addLogMessage("Creating job on backend...")
-		def tempName = getJob().createJob('/nz/nesi')
-		if ( tempName != jobname ) {
-			throw new Exception("Jobname not as expected...")
-		}
-		addLogMessage("Jobname: "+getJob().getJobname())
-		addLogMessage("Submitting job...")
-		getJob().submitJob()
-		addLogMessage("Job submitted")
+		
+		try {
+		
+			addLogMessage("Creating job on backend...")
+			def tempName = getJob().createJob('/nz/nesi')
+			if ( tempName != jobname ) {
+				throw new Exception("Jobname not as expected...")
+			}
+			addLogMessage("Jobname: "+getJob().getJobname())
+			addLogMessage("Submitting job...")
+			getJob().submitJob()
+			addLogMessage("Job submitted")
+			
+			} catch (Exception e) {
+				addLogMessage("Could not submit job for this test: "+e.getLocalizedMessage())
+				success = false
+			}
+			
 	}
 
 	
 	public void waitForJobToFinish(int waittime) {
-		addLogMessage("Waiting for job to finish...")
-		getJob().waitForJobToFinish(waittime)
-		addLogMessage("Job finished")
+		if ( success ) {
+			addLogMessage("Waiting for job to finish...")
+			getJob().waitForJobToFinish(waittime)
+			addLogMessage("Job finished")
+		}
 	}
 
 	public void runChecks() {
+		
+		if ( success ) {
 		
 		addLogMessage("Running checks...")
 
@@ -172,15 +191,24 @@ class GeeTest {
 			
 			def checkname = null
 			def index = line.indexOf("=")
+			def zero_expected = true
+			
 			if ( index > 0 ) {
 				def space_index = line.indexOf(" ")
 				// only assume it's a named check if there is no whitespace before the = char
 				if ( index < space_index ) {
 					checkname = line.substring(0, index)
 					line = line.substring(index+1)
+					line = line.trim()
 				}
 			}
 
+			if ( line.startsWith("!") ) {
+				zero_expected = false
+				line = line.substring(1)
+				line = line.trim()
+			}
+			
 			def tokens = line.tokenize()
 			def exe = tokens[0]
 			
@@ -251,17 +279,20 @@ class GeeTest {
 
 			}
 
-			executeCheck(checkname, cmd)
+			executeCheck(checkname, cmd, zero_expected)
 
 		}
 
 		addLogMessage("All checks finished")
 		
+		
+		}
+
 		cleanup()
 
 	}
 
-	private void executeCheck(def check_name, def cmd) {
+	private void executeCheck(def check_name, def cmd, def zero_expected) {
 
 		
 		addLogMessage "Running check: "+check_name
@@ -299,11 +330,11 @@ class GeeTest {
 
 		int exit = proc.exitValue()
 		
-		if ( exit == 0 ) {
-			addLogMessage ("Check finished, exit code 0, all good")
+		if ( (exit == 0 && zero_expected) || (exit != 0 && ! zero_expected) ) {
+			addLogMessage ("Check finished, all good. Exit code: "+exit)
 		} else {
 			failed_checks.add(check_name)
-			addLogMessage ("Check finished, exit code not 0, check failed")
+			addLogMessage ("Check finished, wrong exit code ( "+exit+" ), check failed")
 			
 			if ( ! this.log_failed_folder.mkdirs() && ! this.log_failed_folder.exists() ) {
 				println ("Could not create folder for failed logs: "+this.log_failed_folder.getAbsolutePath())
