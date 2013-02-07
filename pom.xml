@@ -172,6 +172,22 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.4</version>
+				<!-- <inherited>false</inherited> -->
+				<configuration>
+					<autoVersionSubmodules>true</autoVersionSubmodules>
+					<pushChanges>true</pushChanges>
+					<localCheckout>true</localCheckout>
+					<tagNameFormat>@{project.version}</tagNameFormat>
+					<releaseProfiles>deb,rpm</releaseProfiles>
+				</configuration>
+			</plugin>
+			
+			
 
 			<!-- you can disable the assembly plugin if you want, your builds will 
 				be faster I find it quite handy to have maven build an executable jar, though -->
