@@ -80,7 +80,7 @@ _Gee_ requires a folder hierarchy of applications/jobs/test. When running _Gee_,
 
 ### Creating test stub
 
-_Gee_  provides a helper method to help creating this folder structure for each new test:
+_Gee_  provides a method to help creating this folder structure for each new test easily:
 
      gee --create-test-stub --application <application> --testname <name_of_the_test>
 
