@@ -5,7 +5,6 @@ import grisu.control.ServiceInterface
 import grisu.frontend.model.job.JobObject
 import grisu.model.FileManager
 import grisu.model.GrisuRegistryManager
-import grisu.model.job.JobDescription
 
 import java.text.DateFormat
 
@@ -27,7 +26,8 @@ class GeeTest {
 	private final File folder
 	private final File files_folder
 	private final File checks_folder
-	private final File job_properties_file
+	private final File job_folder
+	private final File submit_properties_file
 	private final File checks_properties_file
 	
 	private final File log_folder
@@ -45,28 +45,29 @@ class GeeTest {
 	private File stdout_file
 	private File stderr_file
 
-	private JobObject job;
+	private final JobObject job;
 	private String jobname;
 	
-	private boolean success = true
+	public boolean success = true
 	private def failed_checks = []
 
 	private final ServiceInterface si;
 	private final FileManager fm;
-
 	
+	private final GJob gJob;
+	
+
 	/**
 	 * Use this constructor to create a new (test-)job
 	 * @param folder the test folder
 	 */
-	public GeeTest(def folder) {
-		this("gee_"+JobnameHelpers.calculateTimestampedJobname(getTestName(folder)), folder)
-		createJob()
-		submitJob()
+	public GeeTest(def folder, def logs_folder) {
+		this("gee_"+JobnameHelpers.calculateTimestampedJobname(getTestName(folder)), folder, logs_folder)
+		//submitJob()
 	}
 	
 	
-	private GeeTest(def jobname, def folder) {
+	private GeeTest(def jobname, def folder, def log_folder) {
 		
 		this.test_name = getTestName(folder)
 		
@@ -91,24 +92,31 @@ class GeeTest {
 		this.root_folder = this.folder.getParentFile().getParentFile().getParentFile()
 		this.global_checks_folder = new File(this.root_folder, Gee.CHECKS_DIR_NAME)
 
-		this.files_folder = new File(this.folder, Gee.FILES_DIR_NAME)
-		this.job_properties_file = new File(this.folder, Gee.JOB_PROPERTIES_FILE_NAME)
+		this.submit_properties_file = new File(this.folder, Gee.SUBMIT_PROPERTIES_FILE_NAME)
+
+		gJob = new GJob(this.submit_properties_file)
+		job = gJob.createJob(si)
+		
 		this.checks_properties_file = new File(this.folder, Gee.CHECKS_PROPERTIES_FILE_NAME)
 		this.checks_folder = new File(this.folder, Gee.CHECKS_DIR_NAME)
-		this.log_folder = new File(this.folder, Gee.LOG_FOLDER_NAME)
+		if ( ! log_folder ) {
+			this.log_folder = new File(this.root_folder, Gee.LOG_FOLDER_NAME+File.separator+this.application_name)
+		} else {
+			this.log_folder = log_folder
+		}
 		
 		if ( ! this.log_folder.mkdirs() && ! this.log_folder.exists() ) {
 			println ("Could not create folder for logs: "+this.log_folder.getAbsolutePath())
 			System.exit(1)
 		}
 
-		this.log_archive_folder = new File(this.log_folder, Gee.LOG_ARCHIVE_FOLDER_NAME)
+		this.log_archive_folder = new File(this.log_folder, Gee.LOG_ARCHIVE_FOLDER_NAME+File.separator+this.application_name)
 		if ( ! this.log_archive_folder.mkdirs() && ! this.log_archive_folder.exists() ) {
 			println ("Could not create folder for archived logs: "+this.log_archive_folder.getAbsolutePath())
 			System.exit(1)
 		}
 
-		this.log_failed_folder = new File(this.log_folder, Gee.LOG_FAILED_FOLDER_NAME+File.separator+this.jobname)
+		this.log_failed_folder = new File(this.log_folder, Gee.LOG_FAILED_FOLDER_NAME+File.separator+this.application_name+File.separator+this.jobname)
 
 
 		this.log_file = new File(this.log_folder, this.jobname+".log")
@@ -120,48 +128,25 @@ class GeeTest {
 		
 		this.log_file.append(tmp)
 		
-		println "["+jobname+"] "+msg
-		
-	}
-
-	private void createJob() {
-		
-		addLogMessage("Assembling job...")
-
-//		def config = new ConfigSlurper().parse(job_properties_file.toURI().toURL()).flatten()
-		Properties props = new Properties();
-		FileInputStream fis = new FileInputStream(job_properties_file);
-	 
-		//loading properites from properties file
-		props.load(fis);
-
-
-		JobDescription jd = new JobDescription(props.asImmutable())
-
-		job = JobObject.createJobObject(si, jd)
-		job.setJobname(this.jobname)
-		
-		files_folder.eachFile { it ->
-			job.addInputFile(it)
+		if ( Gee.verbose ) {
+			println "["+jobname+"] "+msg
 		}
 		
 	}
+
+
 
 	public void submitJob() {
 		
 		try {
 		
-			addLogMessage("Creating job on backend...")
-			def tempName = getJob().createJob('/nz/nesi')
-			if ( tempName != jobname ) {
-				throw new Exception("Jobname not as expected...")
-			}
 			addLogMessage("Jobname: "+getJob().getJobname())
 			addLogMessage("Submitting job...")
 			getJob().submitJob()
 			addLogMessage("Job submitted")
 			
 			} catch (Exception e) {
+				e.printStackTrace()	
 				addLogMessage("Could not submit job for this test: "+e.getLocalizedMessage())
 				success = false
 			}

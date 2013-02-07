@@ -1,13 +1,14 @@
 package grisu.frontend;
 
 import grisu.frontend.view.cli.GrisuCliParameters;
+import grisu.jcommons.constants.Constants;
 
 import com.beust.jcommander.Parameter;
 
 public class GeeCliParameters extends GrisuCliParameters {
 
-	@Parameter(names = { "-f", "--applications-folder" }, description = "folder containing the test")
-	private String folder;
+	@Parameter(names = { "-f", "--applications-folder" }, description = "root folder containing the applications (default: current folder)")
+	private String folder = System.getProperty("user.dir");
 	
 	@Parameter(names = {"--reset" }, description = "move all failed job log fails into the archive folder")
 	private boolean reset;
@@ -20,6 +21,20 @@ public class GeeCliParameters extends GrisuCliParameters {
 	
 	@Parameter(names = {"--testname", "-t" }, description = "the test name")
 	private String testname;
+	
+	@Parameter(names = {"-v", "--verbose"}, description = "more debug output on stdout")
+	private boolean verbose;
+	
+	@Parameter(names = {"--logs"}, description = "the location where logs are kept (default: 'logs' subfolder of applications folder)")
+	private String logsFolder;
+	
+	public String getLogsFolder() {
+		return logsFolder;
+	}
+	
+	public boolean isVerbose() {
+		return verbose;
+	}
 
 	public boolean isReset() {
 		return reset;
