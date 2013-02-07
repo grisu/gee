@@ -29,7 +29,8 @@ Downloads
 
  * Windows (not recommended): [gee.msi](http://code.ceres.auckland.ac.nz/downloads/nesi/gee.msi)
  * Mac OS X: [gee.pgk](http://code.ceres.auckland.ac.nz/downloads/nesi/gee.pkg)
- * Linux (& cross-platform): [nesi-tools.jar](http://code.ceres.auckland.ac.nz/downloads/nesi/nesi-tools.jar)  (make sure to check 'gee' in the installer dialog)
+ * Linux: [deb](http://code.ceres.auckland.ac.nz/downloads/nesi/gee.deb), [rpm](http://code.ceres.auckland.ac.nz/downloads/nesi/gee.rpm) (also need: [nesi.deb](http://code.ceres.auckland.ac.nz/stable-downloads/nesi.deb) / [nesi.rpm](http://code.ceres.auckland.ac.nz/stable-downloads/nesi.rpm))
+ * Cross-platform: [nesi-tools.jar](http://code.ceres.auckland.ac.nz/downloads/nesi/nesi-tools.jar)  (make sure to check 'gee' in the installer dialog)
 
 Running tests
 --------------------
