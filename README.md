@@ -65,7 +65,7 @@ _Gee_ requires a folder hierarchy of applications/jobs/test. When running _Gee_,
 	 |                   | ------   tests
 	 |                                |
 	 |                                | ---- < testname >
-	 |                                |              | ----- submit.config
+	 |                                |              | ----- test.config
 	 |                                |              | ----- checks.config
 	 |                                |              |----- scripts	 
 	 |                                |                         |---- <check_script>	 
@@ -73,7 +73,7 @@ _Gee_ requires a folder hierarchy of applications/jobs/test. When running _Gee_,
 	 |                                |                         | ...
 	 |                                |	 
  	 |                                | ---- < testname >
-	 |                                |             | ----- submit.config
+	 |                                |             | ----- test.config
 	 |                                |             | ----- checks.config
     ...
 	...
@@ -102,7 +102,7 @@ For example:
     ./R/tests
     ./R/tests/R_version_test
     ./R/tests/R_version_test/checks.config
-    ./R/tests/R_version_test/submit.config
+    ./R/tests/R_version_test/test.config
     ./R/tests/R_version_test/scripts
     ./R/tests/R_version_test/scripts/check_for_some_string.py
     ./R/tests/R_version_test/scripts/readme.txt
@@ -118,12 +118,10 @@ The _job.config_ file sets up the job that will be submitted. Only job propertie
 
 Example:
 
-     // required parameters
+     // required parameter
      // -------------------
     
      commandline = cat example_input_file.txt
-     application = generic
-     walltime = 10h
     
      // optional parameters
      // --------------------
@@ -142,12 +140,13 @@ Example:
      // stdout = stdout.txt
      // stdin = input.txt
      // virtualMemory = 2g
+     // walltime = 10h
 
 #### _files_ folder or file
 
 A folder containing all input files that are required for the job. Can also be a text-file called 'files' with one url/path per line. All the files specified here will be uploaded to the working directory of the job.
 
-#### _submit.config_
+#### _test.config_
 
 A file containing submission related properties (group, queue, ...). Example:
 
