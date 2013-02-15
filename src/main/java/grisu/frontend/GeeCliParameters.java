@@ -16,10 +16,10 @@ public class GeeCliParameters extends GrisuCliParameters {
 	@Parameter(names = {"--create-test-stub" }, description = "create a new test client stub")
 	private boolean create_test_stub;
 	
-	@Parameter(names = {"--application", "-a" }, description = "the application name")
+	@Parameter(names = {"--package", "-p" }, description = "the package name")
 	private String app;
 	
-	@Parameter(names = {"--testname", "-t" }, description = "the test name")
+	@Parameter(names = {"--testname" }, description = "the test name")
 	private String testname;
 	
 	@Parameter(names = {"-v", "--verbose"}, description = "more debug output on stdout")
@@ -27,6 +27,13 @@ public class GeeCliParameters extends GrisuCliParameters {
 	
 	@Parameter(names = {"--logs"}, description = "the location where logs are kept (default: 'logs' subfolder of applications folder)")
 	private String logsFolder;
+	
+	@Parameter(names = {"--test", "-t"}, description = "the folder where the test to execute is located")
+	private String test;
+	
+	public String getTest() {
+		return test;
+	}
 	
 	public String getLogsFolder() {
 		return logsFolder;

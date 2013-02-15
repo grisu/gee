@@ -2,9 +2,10 @@ package grisu.frontend.gee
 
 import grisu.frontend.GeeCliParameters
 import grisu.frontend.control.login.LoginManager
-import grisu.frontend.utils.PackageFileHelper
 import grisu.frontend.view.cli.GrisuCliClient
 import grisu.jcommons.constants.Constants
+import grisu.jcommons.constants.JobSubmissionProperty;
+import grisu.jcommons.utils.PackageFileHelper;
 import grisu.jcommons.view.html.VelocityUtils
 import groovy.io.FileType
 
@@ -15,21 +16,19 @@ import java.util.concurrent.TimeUnit
 import com.google.common.collect.Maps
 
 class Gee extends GrisuCliClient<GeeCliParameters> {
-	
+
 	public static boolean verbose = false
 
-	public final static String JOB_KEY = "job"
 	public final static String GROUP_KEY = "group"
 	public final static String QUEUE_KEY = "queue"
 	public final static String JOBNAME_KEY = Constants.JOBNAME_KEY
-	
+
 	public final static String TESTS_DIR_NAME = "tests"
 	public final static String JOBS_DIR_NAME = "jobs"
 	public final static String CHECKS_DIR_NAME = "scripts"
-	public final static String FILES_DIR_NAME = "files"
-	public final static String JOB_PROPERTIES_FILE_NAME = "job.config"
 	public final static String CHECKS_PROPERTIES_FILE_NAME = "checks.config"
-	public final static String SUBMIT_PROPERTIES_FILE_NAME = "submit.config"
+	public final static String TEST_PROPERTIES_FILE_NAME = "test.config"
+	
 
 	public final static String LOG_FOLDER_NAME = "logs"
 	public final static String LOG_ARCHIVE_FOLDER_NAME = "archived"
@@ -41,28 +40,28 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 		if ( config_filename ) {
 			file = getConfigFile(file, config_filename)
 		}
-				
+
 		if ( file instanceof String ) {
 			file = new File(file)
 		}
 		Properties props = new Properties();
 		FileInputStream fis = new FileInputStream(file);
-	 
+
 		//loading properites from properties file
 		props.load(fis);
-	
+
 		return props
 
 	}
-	
-	private static File getConfigFile(def file_or_folder, String config_filename) {
-		
+
+	public static File getConfigFile(def file_or_folder, String config_filename) {
+
 		if (file_or_folder instanceof String) {
 			file_or_folder = new File(file_or_folder)
 		}
-		
+
 		File result = null
-		
+
 		if ( file_or_folder instanceof File ) {
 			if ( file_or_folder.isFile() && config_filename.equals(file_or_folder.getName()) ) {
 				result = file_or_folder
@@ -74,14 +73,13 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 		} else {
 			throw new RuntimeException("Can't get submit config file: "+file_or_folder)
 		}
-		
+
 		if ( ! result.exists() ) {
 			throw new RuntimeException("Config file: "+result.getAbsolutePath()+" does not exist.")
 		}
 		return result
-		
 	}
-	
+
 	static main(args) {
 
 		LoginManager.initGrisuClient("gee");
@@ -89,7 +87,7 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 		// helps to parse commandline arguments, if you don't want to create
 		// your own parameter class, just use DefaultCliParameters
 		GeeCliParameters params = new GeeCliParameters();
-		
+
 		// create the client
 		Gee gee = null;
 		try {
@@ -108,17 +106,17 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 		System.exit(0);
 
 	}
-	
-	private def root_folder
-	private def logs_folder
+
 
 	public Gee(GeeCliParameters params, String[] args) throws Exception {
 		super(params, args)
 		if ( getCliParameters().isVerbose() ) {
 			Gee.verbose = true
 		}
-		
-		getServiceInterface()
+
+		if ( ! getCliParameters().isCreate_test_stub() ) {
+			getServiceInterface()
+		}
 	}
 
 	private static void createTestStub(File path, String app, String name) {
@@ -137,51 +135,29 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 			println ("Can't create directory "+test_folder.getAbsolutePath()+".")
 			System.exit(1)
 		}
-		
-		boolean job_exists = false
+
 		if (job_folder.exists()) {
 			println("Jobs folder already exists, not creating new one.")
-			job_exists = true
 		} else {
-			job_folder.mkdirs()
-			if (! job_folder.exists()) {
-				println("Can't create directory "+job_folder.getAbsolutePath()+".")
+			try {
+				GJob.createJobStub(job_folder, name)
+			} catch (Exception e) {
+				println("Can't create job: "+job_folder.getAbsolutePath()+".")
 				System.exit(1)
 			}
 		}
 
 		File temp = null
-		if (! job_exists ) { 
-			temp = PackageFileHelper.getFile('job.config')
-			new File(job_folder, JOB_PROPERTIES_FILE_NAME) << temp.text
-			temp = new File(job_folder, FILES_DIR_NAME)
-			temp.mkdirs()
-			if ( ! temp.exists() ) {
-				println ("Can't create folder: "+temp.getAbsolutePath())
-				System.exit(1)
-			}
-	
-			temp = PackageFileHelper.getFile('readme_files.txt')
-			new File(job_folder, 'readme.txt') << temp.text
-			
-			File input_files = new File(job_folder, FILES_DIR_NAME)
-			input_files.mkdirs()
-			if ( ! input_files.exists() ) {
-				println ("Can't create folder: "+input_files)
-				System.exit(1)
-			}
-			temp = PackageFileHelper.getFile('example_input_file.txt')
-			new File(input_files, 'example_input_file.txt') << temp.text
-			
-		}
 
 		temp = PackageFileHelper.getFile('checks.config')
 		new File(test_folder, CHECKS_PROPERTIES_FILE_NAME) << temp.text
-		
+
 		Map properties = Maps.newHashMap()
-		properties.put('job_dir', app+File.separator+JOBS_DIR_NAME+File.separator+name)
-		String configContent = VelocityUtils.render('submit.config', properties)
-		new File(test_folder, SUBMIT_PROPERTIES_FILE_NAME) << configContent
+		String relativePath = "../../"+JOBS_DIR_NAME+"/"+job_folder.getName()+"/"+GJob.JOB_PROPERTIES_FILE_NAME
+
+		properties.put('job_dir', relativePath)
+		String configContent = VelocityUtils.render('test.config', properties)
+		new File(test_folder, TEST_PROPERTIES_FILE_NAME) << configContent
 
 		File checks = new File(test_folder, CHECKS_DIR_NAME)
 		checks.mkdirs()
@@ -234,90 +210,99 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 	@Override
 	public void run() {
 
+		def root_folder
+		def logs_folder
+
 		def job_files = []
 
 		String root_folder_path = getCliParameters().getFolder()
+		String testpath = getCliParameters().getTest()
 
-		if ( ! root_folder_path ) {
-			println "No application folder specified. Use the -f/--application-folder option."
+		if ( ! root_folder_path && ! testpath ) {
+			println "No application folder or test specified. Use the -f/--application-folder or -t/--test option."
 			System.exit(1)
 		}
 
-		root_folder = new File(root_folder_path)
-
-		if ( ! root_folder.exists() ) {
-			root_folder.mkdirs()
-			if ( ! root_folder.exists() ) {
-				println "Could not create folder: "+root_folder_path
-				System.exit(1)
-			}
-		}
-
-		logs_folder = getCliParameters().getLogsFolder()
-		
-		if ( ! logs_folder ) {
-			logs_folder = new File(root_folder, LOG_FOLDER_NAME)
+		if ( testpath ) {
+			job_files = [testpath]
 		} else {
-			logs_folder = new File(logs_folder)
-		}
-		
-		logs_folder.mkdirs()
-		if (! logs_folder.exists() ) {
-			println "Can't create folder for logs: "+logs_folder
-			System.exit(1)
-		}
 
-		String appName = getCliParameters().getApp()
-		String testName = getCliParameters().getTestName()
+			root_folder = new File(root_folder_path)
 
+			if ( ! root_folder.exists() ) {
+				root_folder.mkdirs()
+				if ( ! root_folder.exists() ) {
+					println "Could not create folder: "+root_folder_path
+					System.exit(1)
+				}
+			}
 
-		if ( getCliParameters().isCreate_test_stub() ) {
-			if ( ! appName ) {
-				println "No application name specified, can't create test stub..."
+			logs_folder = getCliParameters().getLogsFolder()
+
+			if ( ! logs_folder ) {
+				logs_folder = new File(root_folder, LOG_FOLDER_NAME)
+			} else {
+				logs_folder = new File(logs_folder)
+			}
+
+			logs_folder.mkdirs()
+			if (! logs_folder.exists() ) {
+				println "Can't create folder for logs: "+logs_folder
 				System.exit(1)
 			}
-			if ( ! testName ) {
-				println "No testname specified, can't create test stub..."
+
+			String appName = getCliParameters().getApp()
+			String testName = getCliParameters().getTestName()
+
+
+			if ( getCliParameters().isCreate_test_stub() ) {
+				if ( ! appName ) {
+					println "No application name specified, can't create test stub..."
+					System.exit(1)
+				}
+				if ( ! testName ) {
+					println "No testname specified, can't create test stub..."
+				}
+
+				println "Creating test stub for application "+appName+": "+testName
+				createTestStub(root_folder, appName, testName)
+				println "Stub created."
+
+				System.exit(0)
 			}
 
-			println "Creating test stub for application "+appName+": "+testName
-			createTestStub(root_folder, appName, testName)
-			println "Stub created."
+			// figuring out which tests to run
+			root_folder.traverse(type: FileType.FILES, nameFilter: ~/test.config$/) { it -> job_files << it }
 
-			System.exit(0)
-		}
+			if ( testName ) {
+				job_files = job_files.findAll { it ->
+					it.getAbsolutePath().contains(File.separator+TESTS_DIR_NAME+File.separator+testName)
+				}
+			}
 
-		// figuring out which tests to run
-		root_folder.traverse(type: FileType.FILES, nameFilter: ~/submit.config$/) { it -> job_files << it }
+			if ( appName ) {
+				job_files = job_files.findAll() { it ->
+					it.getAbsolutePath().contains(File.separator+appName+File.separator+TESTS_DIR_NAME)
+				}
+			}
 
-		if ( testName ) {
-			job_files = job_files.findAll { it ->
-				it.getAbsolutePath().contains(File.separator+TESTS_DIR_NAME+File.separator+testName)
+
+
+			if ( job_files.size() == 0 ) {
+				println "No test job configs found."
+				System.exit(1)
 			}
 		}
 
-		if ( appName ) {
-			job_files = job_files.findAll() { it ->
-				it.getAbsolutePath().contains(File.separator+appName+File.separator+TESTS_DIR_NAME)
-			}
-		}
-
-
-
-		if ( job_files.size() == 0 ) {
-			println "No test job configs found."
-			System.exit(1)
-		}
-
-		submit(job_files)
+		submit(job_files, logs_folder)
 
 	}
-	
-	private void submit(def job_files) {
-		
+
+	private void submit(def job_files, def logs_folder) {
+
 		def THREADS = 10
 		ExecutorService pool = Executors.newFixedThreadPool(THREADS)
-		
+
 		println("Running tests:")
 		job_files.each { println it }
 
@@ -329,49 +314,49 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 
 			Thread t = new Thread() {
 
-				public void run() {
-					println 'Creating test using config file: '+it
-					GeeTest test = new GeeTest(it.getParentFile(), logs_folder)
-					tests.add(test)
-					test.submitJob()
-				}
-			}
-			
+						public void run() {
+							println 'Creating test using config file: '+it
+							GeeTest test = new GeeTest(it.getParentFile(), logs_folder)
+							tests.add(test)
+							test.submitJob()
+						}
+					}
+
 			pool.execute(t)
 		}
-		
+
 		println "Waiting for submissions to finish..."
-		
+
 		pool.shutdown()
 		pool.awaitTermination(10, TimeUnit.HOURS)
-		
+
 		println "Submissions finished."
-		
+
 		pool = Executors.newFixedThreadPool(THREADS)
 
 		int exitCode = 0
-		
+
 		tests.each { test ->
 			Thread t = new Thread() {
-				public void run() {
-					println "Waiting for test to finish: "+test.test_name
-					test.waitForJobToFinish(4)
-					if ( ! test.success ) {
-						println "Job not submitted or failed, not running checks..."
-					} else {
-						println "Job finished for test: "+test.test_name+". Running checks..."
-						test.runChecks()
+						public void run() {
+							println "Waiting for test to finish: "+test.test_name
+							test.waitForJobToFinish(4)
+							if ( ! test.success ) {
+								println "Job not submitted or failed, not running checks..."
+							} else {
+								println "Job finished for test: "+test.test_name+". Running checks..."
+								test.runChecks()
+							}
+						}
 					}
-				}
-			}
 			pool.execute(t)
 		}
-		
+
 		println "Waiting for jobs to finish..."
-		
+
 		pool.shutdown()
 		pool.awaitTermination(24, TimeUnit.HOURS)
-		
+
 		println "Checks finished."
 
 		if ( tests.any{ it ->
@@ -384,9 +369,9 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 				println "Test: "+test.test_name
 				test.getFailedChecks().each { checkName -> println '\t'+checkName }
 			}
-			
+
 			exitCode = 1
-			
+
 		} else {
 
 			println "All good! No check failed. Hm, that can't be right..."

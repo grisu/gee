@@ -2,7 +2,7 @@ package grisu.frontend.gee
 
 import grisu.control.JobnameHelpers
 import grisu.control.ServiceInterface
-import grisu.frontend.model.job.JobObject
+import grisu.frontend.model.job.GrisuJob
 import grisu.model.FileManager
 import grisu.model.GrisuRegistryManager
 
@@ -45,7 +45,7 @@ class GeeTest {
 	private File stdout_file
 	private File stderr_file
 
-	private final JobObject job;
+	private final GrisuJob job;
 	private String jobname;
 	
 	public boolean success = true
@@ -92,9 +92,14 @@ class GeeTest {
 		this.root_folder = this.folder.getParentFile().getParentFile().getParentFile()
 		this.global_checks_folder = new File(this.root_folder, Gee.CHECKS_DIR_NAME)
 
-		this.submit_properties_file = new File(this.folder, Gee.SUBMIT_PROPERTIES_FILE_NAME)
+		this.submit_properties_file = new File(this.folder, Gee.TEST_PROPERTIES_FILE_NAME)
 
-		gJob = new GJob(this.submit_properties_file)
+		try {
+			gJob = new GJob(this.submit_properties_file)
+		} catch (Exception e) {
+			println "Can't create job from '"+this.submit_properties_file+"': "+e.getLocalizedMessage()
+			System.exit(1)
+		}
 		job = gJob.createJob(si)
 		
 		this.checks_properties_file = new File(this.folder, Gee.CHECKS_PROPERTIES_FILE_NAME)
@@ -278,7 +283,6 @@ class GeeTest {
 	}
 
 	private void executeCheck(def check_name, def cmd, def zero_expected) {
-
 		
 		addLogMessage "Running check: "+check_name
 		addLogMessage "Check details: "+cmd
@@ -364,7 +368,7 @@ class GeeTest {
 			
 	}
 
-	public JobObject getJob() {
+	public GrisuJob getJob() {
 		return this.job
 	}
 
