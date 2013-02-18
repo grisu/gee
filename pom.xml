@@ -469,7 +469,7 @@
 
 
 	<properties>
-		<grisu.version>0.5.18-SNAPSHOT</grisu.version>
+		<grisu.version>0.5.18</grisu.version>
 	</properties>
 	<organization>
 		<name>NeSI</name>
