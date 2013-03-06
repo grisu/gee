@@ -96,6 +96,30 @@ class GJob {
 		String configContent = VelocityUtils.render('submit.config', properties)
 		new File(job_folder, SUBMIT_PROPERTIES_FILE_NAME) << configContent
 	}
+	
+	private static File parseJobFromSubmitPropertiesFile(File spf) {
+		Map<String, String> temp = Gee.parsePropertiesFile(spf)
+		def tempString = temp.get(JOB_KEY)
+		if ( ! tempString ) {
+			throw new RuntimeException("Submit config file does not have 'job' property but is used to create GJob object")
+		}
+
+		tempString = tempString.replace("/", File.separator)
+		if (! tempString.endsWith(JOB_PROPERTIES_FILE_NAME) ) {
+			tempString = tempString+File.separator+JOB_PROPERTIES_FILE_NAME
+		}
+
+		File tempFile = new File(tempString)
+
+		if ( ! tempFile.exists() ) {
+			tempFile = new File(spf.getParentFile().getPath()+File.separator+tempString)
+			if ( !tempFile.exists() ) {
+				throw new RuntimeException("Can't find job config: "+tempString)
+			}
+		}
+
+		return tempFile
+	}
 
 
 	final String job_name
@@ -123,32 +147,21 @@ class GJob {
 			this.submit_properties_file = folder
 			myLogger.debug("Parsing submit properties file for job...")
 			
-			Map<String, String> temp = Gee.parsePropertiesFile(folder)
-			def tempString = temp.get(JOB_KEY)
-			if ( ! tempString ) {
-				throw new RuntimeException("Submit config file does not have 'job' property but is used to create GJob object")
-			}
-
-			tempString = tempString.replace("/", File.separator)
-
-			File tempFile = new File(tempString)
-			if ( ! tempFile.exists() ) {
-				tempFile = new File(folder.getParentFile().getPath()+File.separator+tempString)
-				if ( !tempFile.exists() ) {
-					throw new RuntimeException("Can't find job config: "+tempString)
-				}
-			}
-
-			folder = tempFile
+			folder = parseJobFromSubmitPropertiesFile(folder)
 			
 			myLogger.debug("Job config in: "+folder.getAbsolutePath())
 
+		} else if ( folder.isDirectory() && new File(folder, SUBMIT_PROPERTIES_FILE_NAME).exists() ){
+			this.submit_properties_file = new File(folder, SUBMIT_PROPERTIES_FILE_NAME)
+			folder = parseJobFromSubmitPropertiesFile(this.submit_properties_file)
+			
 		} else {
 			this.submit_properties_file = null
 		}
 
 		if ( JOB_PROPERTIES_FILE_NAME.equals(folder.getName()) ) {
 			this.job_properties_file = folder
+			
 		} else {
 			job_properties_file = new File(folder, JOB_PROPERTIES_FILE_NAME)
 		}
