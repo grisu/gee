@@ -3,7 +3,7 @@
 	<groupId>grisu.frontend</groupId>
 	<artifactId>gee</artifactId>
 	<packaging>jar</packaging>
-	<version>0.9-SNAPSHOT</version>
+	<version>0.10-SNAPSHOT</version>
 	<name>A client to run end-to-end application tests via the grid.</name>
 
 	<parent>
