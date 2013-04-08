@@ -1,17 +1,24 @@
 package grisu.frontend.gee
 
 import grisu.frontend.GeeCliParameters
+import grisu.frontend.control.GJob
+import grisu.frontend.control.jobMonitoring.RunningJobManager;
 import grisu.frontend.control.login.LoginManager
 import grisu.frontend.view.cli.GrisuCliClient
 import grisu.jcommons.constants.Constants
-import grisu.jcommons.constants.JobSubmissionProperty;
-import grisu.jcommons.utils.PackageFileHelper;
+import grisu.jcommons.utils.PackageFileHelper
 import grisu.jcommons.view.html.VelocityUtils
+import grisu.model.FileManager;
+import grisu.model.GrisuRegistryManager;
 import groovy.io.FileType
 
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Maps
 
@@ -27,8 +34,8 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 	public final static String JOBS_DIR_NAME = "jobs"
 	public final static String CHECKS_DIR_NAME = "scripts"
 	public final static String CHECKS_PROPERTIES_FILE_NAME = "checks.config"
-	public final static String TEST_PROPERTIES_FILE_NAME = "test.config"
-	
+	public final static String TEST_PROPERTIES_FILE_NAME = "test.grisu"
+
 
 	public final static String LOG_FOLDER_NAME = "logs"
 	public final static String LOG_ARCHIVE_FOLDER_NAME = "archived"
@@ -223,10 +230,7 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 			System.exit(1)
 		}
 
-		if ( testpath ) {
-			job_files = [testpath]
-		} else {
-
+		if ( root_folder_path ) {
 			root_folder = new File(root_folder_path)
 
 			if ( ! root_folder.exists() ) {
@@ -236,20 +240,41 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 					System.exit(1)
 				}
 			}
+		}
 
-			logs_folder = getCliParameters().getLogsFolder()
+		logs_folder = getCliParameters().getLogsFolder()
 
-			if ( ! logs_folder ) {
-				logs_folder = new File(root_folder, LOG_FOLDER_NAME)
-			} else {
-				logs_folder = new File(logs_folder)
-			}
-
-			logs_folder.mkdirs()
-			if (! logs_folder.exists() ) {
-				println "Can't create folder for logs: "+logs_folder
+		if ( ! logs_folder ) {
+			if ( ! root_folder_path ) {
+				println "No application folder specified, can't cleanup. Please use -f/--application-folder to specify the root of the application hierarchy."
 				System.exit(1)
 			}
+			logs_folder = new File(root_folder, LOG_FOLDER_NAME)
+		} else {
+			logs_folder = new File(logs_folder)
+		}
+
+		logs_folder.mkdirs()
+		if (! logs_folder.exists() ) {
+			println "Can't create folder for logs: "+logs_folder
+			System.exit(1)
+		}
+
+
+
+		if ( getCliParameters().getCleanup() ) {
+
+			cleanup(logs_folder)
+
+		}
+
+		if ( testpath ) {
+			if ( getCliParameters().isNorun() ) {
+				System.exit(0);
+			}
+			job_files = [testpath]
+		} else {
+
 
 			String appName = getCliParameters().getApp()
 			String testName = getCliParameters().getTestName()
@@ -271,8 +296,12 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 				System.exit(0)
 			}
 
+			if ( getCliParameters().isNorun() ) {
+				System.exit(0);
+			}
+			
 			// figuring out which tests to run
-			root_folder.traverse(type: FileType.FILES, nameFilter: ~/test.config$/) { it -> job_files << it }
+			root_folder.traverse(type: FileType.FILES, nameFilter: ~/test.grisu$/) { it -> job_files << it }
 
 			if ( testName ) {
 				job_files = job_files.findAll { it ->
@@ -315,10 +344,14 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 			Thread t = new Thread() {
 
 						public void run() {
-							println 'Creating test using config file: '+it
-							GeeTest test = new GeeTest(it.getParentFile(), logs_folder)
-							tests.add(test)
-							test.submitJob()
+							try {
+								println 'Creating test using config file: '+it
+								GeeTest test = new GeeTest(it.getParentFile(), logs_folder)
+								tests.add(test)
+								test.submitJob()
+							} catch (Exception e) {
+								e.printStackTrace()
+							}
 						}
 					}
 
@@ -380,6 +413,35 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 
 
 		System.exit(exitCode)
+	}
+
+	private void cleanup(File logs_folder) {
+
+		println logs_folder.getAbsolutePath()+": "+logs_folder.exists()
+
+		def failed_log_files = []
+
+		logs_folder.traverse(type: FileType.FILES, nameFilter: ~/.*log$/) { it ->
+			if ( it.getAbsolutePath().contains(File.separator+'failed'+File.separator) ) {
+				failed_log_files << it
+			}
+		}
+
+		def jobs_to_delete = []
+		for ( File log_file : failed_log_files ) {
+			String jobname = FilenameUtils.getBaseName(log_file.getAbsolutePath());
+			jobs_to_delete << jobname
+			File log_folder = log_file.getParentFile();
+			println "Deleting failed testlogs: "+log_folder.getAbsolutePath()
+
+			FileUtils.deleteQuietly(log_folder)
+		}
+
+		println "Cleaning jobs: "+StringUtils.join(jobs_to_delete, ", ")
+		RunningJobManager.getDefault(getServiceInterface()).killJobsByName(jobs_to_delete, true)
+
+
+
 	}
 
 }

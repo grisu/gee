@@ -1,7 +1,6 @@
 package grisu.frontend;
 
 import grisu.frontend.view.cli.GrisuCliParameters;
-import grisu.jcommons.constants.Constants;
 
 import com.beust.jcommander.Parameter;
 
@@ -30,6 +29,21 @@ public class GeeCliParameters extends GrisuCliParameters {
 	
 	@Parameter(names = {"--test", "-t"}, description = "the folder where the test to execute is located")
 	private String test;
+	
+	@Parameter(names = {"--cleanup", "-c"}, description = "cleanup failed test logs and remove associated jobs")
+	private boolean cleanup;
+	
+	@Parameter(names = {"--no-run"}, description = "don't run any tests")
+	private boolean norun = false; 
+	
+	
+	public boolean isNorun() {
+		return norun;
+	}
+	
+	public boolean getCleanup() {
+		return cleanup;
+	}
 	
 	public String getTest() {
 		return test;
