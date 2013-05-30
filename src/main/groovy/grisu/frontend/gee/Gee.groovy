@@ -1,26 +1,21 @@
 package grisu.frontend.gee
-
+import com.google.common.collect.Maps
 import grisu.frontend.GeeCliParameters
 import grisu.frontend.control.GJob
-import grisu.frontend.control.jobMonitoring.RunningJobManager;
+import grisu.frontend.control.jobMonitoring.RunningJobManager
 import grisu.frontend.control.login.LoginManager
 import grisu.frontend.view.cli.GrisuCliClient
 import grisu.jcommons.constants.Constants
 import grisu.jcommons.utils.PackageFileHelper
 import grisu.jcommons.view.html.VelocityUtils
-import grisu.model.FileManager;
-import grisu.model.GrisuRegistryManager;
 import groovy.io.FileType
+import org.apache.commons.io.FileUtils
+import org.apache.commons.io.FilenameUtils
+import org.apache.commons.lang3.StringUtils
 
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.collect.Maps
 
 class Gee extends GrisuCliClient<GeeCliParameters> {
 
@@ -349,8 +344,11 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 								GeeTest test = new GeeTest(it.getParentFile(), logs_folder)
 								tests.add(test)
 								test.submitJob()
-							} catch (Exception e) {
-								e.printStackTrace()
+							} catch (Throwable e) {
+								println "Failed to create/submit test: '"+it.getParentFile()
+                                        .getName()+"':"+e.getLocalizedMessage()
+                                System.exit(1)
+
 							}
 						}
 					}
