@@ -142,9 +142,9 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 			println("Jobs folder already exists, not creating new one.")
 		} else {
 			try {
-				GJob.createJobStub(job_folder, name)
+				GJob.createJobStub(job_folder.getParent(), name)
 			} catch (Exception e) {
-				println("Can't create job: "+job_folder.getAbsolutePath()+".")
+				println("Can't create job: "+job_folder.getAbsolutePath()+": "+e.getLocalizedMessage())
 				System.exit(1)
 			}
 		}
@@ -294,7 +294,7 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 			if ( getCliParameters().isNorun() ) {
 				System.exit(0);
 			}
-			
+
 			// figuring out which tests to run
 			root_folder.traverse(type: FileType.FILES, nameFilter: ~/test.grisu$/) { it -> job_files << it }
 
