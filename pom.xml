@@ -469,7 +469,7 @@
 
 
 	<properties>
-		<grisu.version>0.7.8</grisu.version>
+		<grisu.version>0.7.9</grisu.version>
 	</properties>
 	<organization>
 		<name>NeSI</name>
