@@ -405,7 +405,7 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 
 		} else {
 
-			println "All good! No check failed. Hm, that can't be right..."
+			println "All good! No check failed."
 
 		}
 
