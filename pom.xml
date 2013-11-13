@@ -3,13 +3,13 @@
 	<groupId>grisu.frontend</groupId>
 	<artifactId>gee</artifactId>
 	<packaging>jar</packaging>
-	<version>0.8-SNAPSHOT</version>
+	<version>0.15</version>
 	<name>A client to run end-to-end application tests via the grid.</name>
 
 	<parent>
 		<groupId>nz.org.nesi</groupId>
 		<artifactId>nesi</artifactId>
-		<version>0.23</version>
+		<version>1.0</version>
 	</parent>
 
 	<repositories>
@@ -33,7 +33,7 @@
 	<dependencies>
 
 		<!-- the main grisu dependency. -->
-		<!-- comment this and uncomment the 'grisu-client-swing' dependency below 
+		<!-- comment this and uncomment the 'grisu-client-swing' dependency below
 			if you need the swing dependencies -->
 		<dependency>
 			<groupId>grisu.frontend</groupId>
@@ -52,10 +52,10 @@
 		<!-- </dependency> -->
 
 
-		<!-- we can't include the bouncy castle library in our assembled binary 
-			so it has to put in the classpath in some other way. You could either have 
-			the bcprov jar in the same directory as your executable jar, or you just 
-			do nothing. Grisu will try to download it in the background and put it in 
+		<!-- we can't include the bouncy castle library in our assembled binary
+			so it has to put in the classpath in some other way. You could either have
+			the bcprov jar in the same directory as your executable jar, or you just
+			do nothing. Grisu will try to download it in the background and put it in
 			the classpath once your application is executed the first time... -->
 		<dependency>
 			<groupId>bouncycastle</groupId>
@@ -65,12 +65,12 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- further grisu dependencies, incuded by default but can be enabled/disabled 
+		<!-- further grisu dependencies, incuded by default but can be enabled/disabled
 			if not needed and you want a smaller assembly -->
-		<!-- the grisu-core dependency is needed when you want to connect to a 
+		<!-- the grisu-core dependency is needed when you want to connect to a
 			local backend (which is the only supported backend for grisu 0.3 at the moment -->
-		<!-- <dependency> <groupId>grisu.backend</groupId> <artifactId>grisu-core</artifactId> 
-			<version>${grisu.version}</version> <type>jar</type> <scope>compile</scope> 
+		<!-- <dependency> <groupId>grisu.backend</groupId> <artifactId>grisu-core</artifactId>
+			<version>${grisu.version}</version> <type>jar</type> <scope>compile</scope>
 			</dependency> -->
 
 
@@ -172,7 +172,7 @@
 					</dependency>
 				</dependencies>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
@@ -186,10 +186,10 @@
 					<releaseProfiles>deb,rpm</releaseProfiles>
 				</configuration>
 			</plugin>
-			
-			
 
-			<!-- you can disable the assembly plugin if you want, your builds will 
+
+
+			<!-- you can disable the assembly plugin if you want, your builds will
 				be faster I find it quite handy to have maven build an executable jar, though -->
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -453,9 +453,9 @@
 							<preinstallScriptlet>
 								<script>echo "Installing gee..."</script>
 							</preinstallScriptlet>
-							<!-- <postinstallScriptlet> <scriptFile>src/main/scripts/postinstall</scriptFile> 
-								<fileEncoding>utf-8</fileEncoding> </postinstallScriptlet> <preremoveScriptlet> 
-								<scriptFile>src/main/scripts/preremove</scriptFile> <fileEncoding>utf-8</fileEncoding> 
+							<!-- <postinstallScriptlet> <scriptFile>src/main/scripts/postinstall</scriptFile>
+								<fileEncoding>utf-8</fileEncoding> </postinstallScriptlet> <preremoveScriptlet>
+								<scriptFile>src/main/scripts/preremove</scriptFile> <fileEncoding>utf-8</fileEncoding>
 								</preremoveScriptlet> -->
 						</configuration>
 					</plugin>
@@ -469,7 +469,7 @@
 
 
 	<properties>
-		<grisu.version>0.5.33</grisu.version>
+		<grisu.version>0.8</grisu.version>
 	</properties>
 	<organization>
 		<name>NeSI</name>
@@ -479,7 +479,7 @@
 		<url>https://github.com/grisu/gee</url>
 		<connection>scm:git:git://github.com/grisu/gee.git</connection>
 		<developerConnection>scm:git:git@github.com:grisu/gee.git</developerConnection>
-	  <tag>HEAD</tag>
+	  <tag>0.15</tag>
   </scm>
 	<issueManagement>
 		<system>Github</system>

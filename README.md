@@ -27,9 +27,9 @@ if you also want to build deb and/or rpm packages:
 Downloads
 ----------------
 
- * Windows (not recommended): [gee.msi](http://code.ceres.auckland.ac.nz/downloads/nesi/gee.msi)
- * Mac OS X: [gee.pgk](http://code.ceres.auckland.ac.nz/downloads/nesi/gee.pkg)
- * Linux: [deb](http://code.ceres.auckland.ac.nz/downloads/nesi/gee.deb), [rpm](http://code.ceres.auckland.ac.nz/downloads/nesi/gee.rpm) (also need: [nesi.deb](http://code.ceres.auckland.ac.nz/stable-downloads/nesi.deb) / [nesi.rpm](http://code.ceres.auckland.ac.nz/stable-downloads/nesi.rpm))
+ * Windows (not recommended): [gee.msi](http://code.ceres.auckland.ac.nz/stable-downloads/gee/gee.msi)
+ * Mac OS X: [gee.pgk](http://code.ceres.auckland.ac.nz/stable-downloads/gee/gee.pkg)
+ * Linux: [deb](http://code.ceres.auckland.ac.nz/stable-downloads/gee/gee.deb), [rpm](http://code.ceres.auckland.ac.nz/stable-downloads/gee/gee.rpm) (also need: [nesi.deb](http://code.ceres.auckland.ac.nz/stable-downloads/nesi/nesi.deb) / [nesi.rpm](http://code.ceres.auckland.ac.nz/stable-downloads/nesi/nesi.rpm))
  * Cross-platform: [nesi-tools.jar](http://code.ceres.auckland.ac.nz/downloads/nesi/nesi-tools.jar)  (make sure to check 'gee' in the installer dialog)
 
 Running tests
@@ -51,7 +51,7 @@ _Gee_ requires a folder hierarchy of applications/jobs/test. When running _Gee_,
 	 |                   | ------ jobs
 	 |                   |            | 
 	 |                   |            |--- < job_name>
-	 |                   |            |              | ----- job.config
+	 |                   |            |              | ----- job.grisu
  	 |                   |            |              |----- files	 
 	 |                   |            |                         |---- <input_file>
 	 |                   |            |                         |---- <input_file>
@@ -59,13 +59,13 @@ _Gee_ requires a folder hierarchy of applications/jobs/test. When running _Gee_,
 	 |                   |            |
 	 |                   |            | 
 	 |                   |            |--- < job_name>
-	 |                   |                           | ----- job.config
+	 |                   |                           | ----- job.grisu
  	 |                   |                           |----- files	 ( can also be text file with one path/url per line )
 	 |                   |
 	 |                   | ------   tests
 	 |                                |
 	 |                                | ---- < testname >
-	 |                                |              | ----- test.config
+	 |                                |              | ----- test.grisu
 	 |                                |              | ----- checks.config
 	 |                                |              |----- scripts	 
 	 |                                |                         |---- <check_script>	 
@@ -73,7 +73,7 @@ _Gee_ requires a folder hierarchy of applications/jobs/test. When running _Gee_,
 	 |                                |                         | ...
 	 |                                |	 
  	 |                                | ---- < testname >
-	 |                                |             | ----- test.config
+	 |                                |             | ----- test.grisu
 	 |                                |             | ----- checks.config
     ...
 	...
@@ -95,14 +95,14 @@ For example:
     ./R
     ./R/jobs
     ./R/jobs/R_version_test
-    ./R/jobs/R_version_test/job.config
+    ./R/jobs/R_version_test/job.grisu
     ./R/jobs/R_version_test/readme.txt
     ./R/jobs/R_version_test/files
     ./R/jobs/R_version_test/files/example_input_file.txt
     ./R/tests
     ./R/tests/R_version_test
     ./R/tests/R_version_test/checks.config
-    ./R/tests/R_version_test/test.config
+    ./R/tests/R_version_test/test.grisu
     ./R/tests/R_version_test/scripts
     ./R/tests/R_version_test/scripts/check_for_some_string.py
     ./R/tests/R_version_test/scripts/readme.txt
@@ -112,9 +112,9 @@ For example:
 
 ### List of files and their significance
 
-#### _job.config_
+#### _job.grisu_
 
-The _job.config_ file sets up the job that will be submitted. Only job properties are specified, no submission-related ones. 
+The _job.grisu_ file sets up the job that will be submitted. Only job properties are specified, no submission-related ones. 
 
 Example:
 
@@ -146,7 +146,7 @@ Example:
 
 A folder containing all input files that are required for the job. Can also be a text-file called 'files' with one url/path per line. All the files specified here will be uploaded to the working directory of the job.
 
-#### _test.config_
+#### _test.grisu_
 
 A file containing submission related properties (group, queue, ...). Example:
 
