@@ -240,11 +240,8 @@ class Gee extends GrisuCliClient<GeeCliParameters> {
 		logs_folder = getCliParameters().getLogsFolder()
 
 		if ( ! logs_folder ) {
-			if ( ! root_folder_path ) {
-				println "No application folder specified, can't cleanup. Please use -f/--application-folder to specify the root of the application hierarchy."
-				System.exit(1)
-			}
-			logs_folder = new File(root_folder, LOG_FOLDER_NAME)
+            logs_folder = new File(System.getProperty("java.io.tmpdir"), "gee_logs")
+            println ("No logs folder specified, writing logs into: "+logs_folder.getAbsolutePath())
 		} else {
 			logs_folder = new File(logs_folder)
 		}
